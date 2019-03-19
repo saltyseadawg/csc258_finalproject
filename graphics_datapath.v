@@ -1,7 +1,7 @@
 //data path for graphics
-//is adapter ok for screen size? - lab moniter is 1680 x 1050
+//figure out how to write to larger part of screen - lab moniter is 1680 x 1050
 
-module graphics_datapath(clock, x_in, y_in, size, x_out, y_out, load, enable, resetn);
+module graphics_datapath(clock, ,x_out, y_out, load, enable, resetn);
 
 	input clock, load, enable, resetn;
 	
@@ -9,9 +9,10 @@ module graphics_datapath(clock, x_in, y_in, size, x_out, y_out, load, enable, re
 	output [6:0] y_out;
 	output [2:0] colour_out;
 	
-	reg [2:0] colour;
+	reg [7:0] x;
+	reg [6:0] y;
 	
-	//counter for implementing all coordinates of pixels
+	//counter for implementing coordinates of pixels
 	reg [5:0] counter;
 	
 	always @(posedge clock) begin
@@ -21,12 +22,24 @@ module graphics_datapath(clock, x_in, y_in, size, x_out, y_out, load, enable, re
 			colour <= 3'b0;
 		end
 		else begin
-			if (load)
-				x <= {1'b0, point};
-			if (load_y)
-				y <= point;
-			if (load_colour)
-				colour <= c_in;
+			if (load_t0)
+				x <= 8'd0;
+				y <= 7'd0;
+				colour <= 3'b001;
+			if (load_t1)
+				x <= 8'd8;
+				y <= 7'd0;
+				colour <= 3'b010;
+			if (load_t2)
+				x <= 8'd0;
+				y <= 7'd8;
+				colour <= 3'b100;
+			if (load_t3)
+				x <= 8'd8;
+				y <= 7'd8;
+				colour <= 3'b011;
+			if (flash)
+				colour <= 3'b111;
 		end
 	end
 	
@@ -44,8 +57,5 @@ module graphics_datapath(clock, x_in, y_in, size, x_out, y_out, load, enable, re
 	
 	assign x_out = x_in[5:0] + counter[5:3];
 	assign y_out = y_in[5:0] + counter[2:0];
-	
-	
-	
 	
 endmodule
