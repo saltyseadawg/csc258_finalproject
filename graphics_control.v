@@ -1,12 +1,12 @@
 //control unit for graphics
 
-module graphics_control(clock, resetn, load, ld_tile, ld_flash, ld_previous, drw, writeEnable, randomEnable, counterEnable, tile_num);
+module graphics_control(clock, resetn, load, ld_tile, ld_flash, drw, writeEnable, randomEnable, counterEnable, tile_num);
 	input clock;
 	input resetn;
 	input load;
 	input drw;
 
-	output reg ld_tile, ld_flash, ld_previous;
+	output reg ld_tile, ld_flash;
 	output reg writeEnable;
 	output reg randomEnable;
 	output reg counterEnable;
@@ -35,7 +35,7 @@ module graphics_control(clock, resetn, load, ld_tile, ld_flash, ld_previous, drw
 	// State Table
 	always @(*) begin
 		case (curr_state)
-			bootup: next_state = drw ? load_t0 : bootup;
+			bootup: next_state = ~drw ? load_t0 : bootup;
 			load_t0: next_state = draw_t0;
 			draw_t0: next_state = load_t1;
 			load_t1: next_state = draw_t1;
@@ -44,12 +44,12 @@ module graphics_control(clock, resetn, load, ld_tile, ld_flash, ld_previous, drw
 			draw_t2: next_state = load_t3;
 			load_t3: next_state = draw_t3;
 			draw_t3: next_state = tile_select;
-			tile_select: next_state = load ? load_tile : tile_select; 
-			load_tile: next_state = load ? transition : load_tile;
+			tile_select: next_state = ~load ? load_tile : tile_select; 
+			load_tile: next_state = ~load ? transition : load_tile;
 			transition: next_state = flash;
-			flash: next_state = drw ? draw : flash;
+			flash: next_state = ~drw ? draw : flash;
 			draw: next_state = load_previous;
-			load_previous: next_state = drw ? draw_previous : load_previous;
+			load_previous: next_state = ~drw ? draw_previous : load_previous;
 			draw_previous: next_state = tile_select;
 		endcase
 	end
@@ -58,8 +58,7 @@ module graphics_control(clock, resetn, load, ld_tile, ld_flash, ld_previous, drw
 	always @(*) begin
 		ld_tile = 1'b0;
 		ld_flash = 1'b0;
-		ld_previous = 1'b0;
-//		ld_all = 1'b0;
+//		ld_previous = 1'b0;
 		writeEnable = 1'b0;
 		randomEnable = 1'b0;
 		counterEnable = 1'b0;
@@ -84,7 +83,7 @@ module graphics_control(clock, resetn, load, ld_tile, ld_flash, ld_previous, drw
 				counterEnable = 1'b1;
 			end
 			load_previous: begin
-				ld_previous = 1'b1;
+				ld_tile = 1'b1;
 			end
 			draw_previous: begin
 				writeEnable = 1'b1;
