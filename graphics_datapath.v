@@ -4,7 +4,8 @@
 module graphics_datapath(clock, x_out, y_out, load, enable, resetn, x_in, y_in, flash, colour_in, colour_out);
 
 	input clock, load, enable, resetn, flash;
-	input [7:0] x_in, y_in;
+	input [7:0] x_in; 
+	input [6:0] y_in;
 	input [2:0] colour_in;
 	
 	output [7:0] x_out;
