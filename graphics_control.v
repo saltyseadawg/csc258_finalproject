@@ -16,21 +16,21 @@ module graphics_control(clock, resetn, load, ld_tile, ld_flash, drw, writeEnable
 
 	// States
 	localparam bootup			= 4'd0,
-				load_t1 = 4'd8,
-				load_t2 = 4'd9,
-				load_t3 = 4'd10,
-				load_t0 = 4'd11,
-				draw_t0 = 4'd12,
-				draw_t1 = 4'd13,
-				draw_t2 = 4'd14,
-				draw_t3 = 4'd15,
-				tile_select 	= 4'd1, //wait until user input
-				load_tile 			= 4'd2,	//load top left tile 
-				transition 				= 4'd3,	
-				draw					 	= 4'd4,	
-				flash			= 4'd5,	//load tile flash colour
-				load_previous = 4'd6,
-				draw_previous = 4'd7;
+				load_t0 = 4'd1,
+				draw_t0 = 4'd2,
+				load_t1 = 4'd3,
+				draw_t1 = 4'd4,
+				load_t2 = 4'd5,
+				draw_t2 = 4'd6,
+				load_t3 = 4'd7,
+				draw_t3 = 4'd8,
+				tile_select 	= 4'd9, //wait until user input
+				load_tile 			= 4'd10,	//load top left tile 
+				transition 				= 4'd11,	
+				flash			= 4'd12,	//load tile flash colour
+				draw					 	= 4'd13,	
+				load_previous = 4'd14,
+				draw_previous = 4'd15;
 
 	// State Table
 	always @(*) begin
@@ -45,11 +45,11 @@ module graphics_control(clock, resetn, load, ld_tile, ld_flash, drw, writeEnable
 			load_t3: next_state = draw_t3;
 			draw_t3: next_state = tile_select;
 			tile_select: next_state = ~load ? load_tile : tile_select; 
-			load_tile: next_state = ~load ? transition : load_tile;
-			transition: next_state = flash;
-			flash: next_state = ~drw ? draw : flash;
+			load_tile: next_state = transition;
+			transition: next_state = flash; //buffer for load time
+			flash: next_state = draw;
 			draw: next_state = load_previous;
-			load_previous: next_state = ~drw ? draw_previous : load_previous;
+			load_previous: next_state = draw_previous;
 			draw_previous: next_state = tile_select;
 		endcase
 	end
@@ -58,7 +58,6 @@ module graphics_control(clock, resetn, load, ld_tile, ld_flash, drw, writeEnable
 	always @(*) begin
 		ld_tile = 1'b0;
 		ld_flash = 1'b0;
-//		ld_previous = 1'b0;
 		writeEnable = 1'b0;
 		randomEnable = 1'b0;
 		counterEnable = 1'b0;
