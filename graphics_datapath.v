@@ -1,5 +1,5 @@
 //data path for graphics
-//figure out how to write to larger part of screen - lab moniter is 1680 x 1050
+//fix coordinate location in lab
 
 module graphics_datapath(clock, x_out, y_out, load, enable, resetn, x_in, y_in, flash, colour_in, colour_out);
 
