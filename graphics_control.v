@@ -10,16 +10,19 @@ module graphics_control(clock, resetn, load, ld_tile, ld_flash, writeEnable, ran
 	output reg writeEnable; 
 	output reg randomEnable;
 	output reg counterEnable; //paint counter
-	output reg [2:0] tile_num;
+	output reg [1:0] tile_num;
 
 	reg levelEN, seqEN;
 	reg [5:0] curr_state, next_state;
-	output reg [9:0] difficulty;
+	//output reg [9:0] difficulty;
+	output reg [4:0] difficulty;
 	output reg [5:0] sequence_counter; //
 
 	//ensure difficulty starts with value;
 	initial begin
-		difficulty = 10'b1110000000;
+		//difficulty = 10'b1110000000;
+		sequence_counter = 0;
+		difficulty = 3;
 	end
 	
 	//TODO: fixing animation timing
@@ -57,10 +60,10 @@ module graphics_control(clock, resetn, load, ld_tile, ld_flash, writeEnable, ran
 			level_select: next_state = ~load ? generate_sequence : level_select;
 			generate_sequence: next_state = load_tile;
 			load_tile: begin
-				if (difficulty[sequence_counter] == 1'b0)
-					next_state = level_select;
-				else
+				if (sequence_counter < difficulty) //TODO: why does it work when ! 
 					next_state = transition;
+				else
+					next_state = level_select;
 			end
 			transition: next_state = flash; //buffer for load time
 			flash: next_state = draw;
@@ -77,7 +80,7 @@ module graphics_control(clock, resetn, load, ld_tile, ld_flash, writeEnable, ran
 		writeEnable = 1'b0;
 		randomEnable = 1'b0;
 		counterEnable = 1'b0;
-		tile_num = 3'b000;
+		tile_num = 2'b00;
 		levelEN = 1'b0;
 		seqEN = 1'b0;
 		
@@ -92,6 +95,7 @@ module graphics_control(clock, resetn, load, ld_tile, ld_flash, writeEnable, ran
 			end
 			load_tile: begin
 				ld_tile = 1'b1;
+				randomEnable = 1;
 			end
 			transition: begin
 			end
@@ -149,11 +153,11 @@ module graphics_control(clock, resetn, load, ld_tile, ld_flash, writeEnable, ran
 	always @(posedge clock) begin
 		if (levelEN) begin
 			if (~easy)
-					difficulty = 10'b1110000000;
+					difficulty = 3;
 			if (~normal)
-					difficulty = 10'b1111110000;
+					difficulty = 6;
 			if (~hard)
-					difficulty = 10'b1111111110;
+					difficulty = 9;
 		end
 	end
 	

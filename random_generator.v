@@ -1,7 +1,7 @@
 module random_generator(clock, randEN, difficulty, seq);
 	input clock;
 	input randEN;
-	input [8:0] difficulty;
+	input [4:0] difficulty;
 	reg [17:0] counter;
 	output reg [17:0] seq;
  	
