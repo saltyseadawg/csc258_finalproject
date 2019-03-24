@@ -1,5 +1,6 @@
 //data path for graphics
-//figure out how to write to larger part of screen - lab moniter is 1680 x 1050
+//TODO: figure out which coordinates to write to -lab moniter is 1680 x 1050 (currently default to (0,0) for testing purposes)
+//TODO: timing issues - make datapath use a faster clock than control so that all pixels properly written?
 
 module graphics_datapath(clock, x_out, y_out, load, enable, resetn, x_in, y_in, flash, colour_in, colour_out);
 
