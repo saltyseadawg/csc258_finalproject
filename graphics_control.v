@@ -4,12 +4,12 @@ module graphics_control(clock, resetn, load, ld_tile, ld_flash, writeEnable, ran
 	input clock;
 	input resetn;
 	input load;
-	input easy, normal, hard;
+	input easy, normal, hard; //keys to indicate levels
 
 	output reg ld_tile, ld_flash;
-	output reg writeEnable;
+	output reg writeEnable; 
 	output reg randomEnable;
-	output reg counterEnable;
+	output reg counterEnable; //paint counter
 	output reg [2:0] tile_num;
 
 	reg levelEN, seqEN;
@@ -22,8 +22,9 @@ module graphics_control(clock, resetn, load, ld_tile, ld_flash, writeEnable, ran
 		difficulty = 10'b1110000000;
 	end
 	
+	//TODO: fixing animation timing
 	// States
-	localparam bootup			= 5'd0,
+	localparam bootup			= 5'd0, 
 				load_t0 = 5'd1,
 				draw_t0 = 5'd2,
 				load_t1 = 5'd3,

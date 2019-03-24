@@ -1,16 +1,19 @@
 //LUT for tile coordinate and colour values
 
-module tile_LUT(in, x, y, colour, load_random, boot);
-	input [1:0] in;
+module tile_LUT(seq, x, y, colour, load_random, boot, counter);
+	input [5:0] counter;
+	input [17:0] seq;
 	output reg [2:0] colour;
 	output reg [7:0] x;
 	output reg [6:0] y;
 	input load_random;
 	input [1:0] boot;
+	
+	//reg [1:0] seq_tile;
 	 
 	always @(*)
 		if (load_random)
-		case(in)
+		case({seq[counter * 2], seq[counter * 2 + 1]})
 			2'b00: begin
 				x = 8'd0;
 				y = 7'd0;

@@ -1,9 +1,9 @@
-module random_generator(clock, randEN, difficulty, sequence);
+module random_generator(clock, randEN, difficulty, seq);
 	input clock;
 	input randEN;
 	input [8:0] difficulty;
 	reg [17:0] counter;
-	output reg [17:0] sequence;
+	output reg [17:0] seq;
  	
 	//test purposes
 	initial begin
@@ -11,7 +11,7 @@ module random_generator(clock, randEN, difficulty, sequence);
 	end
 	
 	always @(posedge randEN) begin
-		sequence <= counter;
+		seq <= counter;
 	end
 	
 	always @(posedge clock) begin
