@@ -6,15 +6,15 @@ module graphics_datapath(clock, x_out, y_out, load, enable, resetn, x_in, y_in, 
 
 	input clock, load, enable, resetn, flash;
 	input [7:0] x_in; 
-	input [6:0] y_in;
+	input [7:0] y_in;
 	input [2:0] colour_in;
 	
 	output [7:0] x_out;
-	output [6:0] y_out;
+	output [7:0] y_out;
 	output [2:0] colour_out;
 	
 	reg [7:0] x;
-	reg [6:0] y;
+	reg [7:0] y;
 	reg [2:0] colour;
 	
 	//counter for implementing coordinates of pixels
@@ -24,8 +24,8 @@ module graphics_datapath(clock, x_out, y_out, load, enable, resetn, x_in, y_in, 
 	always @(posedge clock) begin
 		if (!resetn) begin
 			x <= 8'b0;
-			y <= 7'b0;
-			colour <= 3'b001;
+			y <= 8'b0;
+			colour <= 3'b000;
 		end
 		else begin
 			if (load)

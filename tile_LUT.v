@@ -37,7 +37,7 @@ module tile_LUT(seq, x, y, colour, load_random, boot, counter);
 			default: begin
 				x = 8'd0;
 				y = 8'd0;
-				colour = 3'b111;
+				colour = 3'b000;
 			end
 		endcase
 		else
@@ -65,7 +65,7 @@ module tile_LUT(seq, x, y, colour, load_random, boot, counter);
 			default: begin
 				x = 8'd0;
 				y = 8'd0;
-				colour = 3'b111;
+				colour = 3'b000;
 			end
 		endcase
 			
