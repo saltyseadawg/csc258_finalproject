@@ -52,10 +52,10 @@ module main(
   input [3:0] KEY;
 
   // assignments
-  assign reset = SW[9]
+  assign reset = SW[9];
 	assign level[3:0] = SW[4:2];
 	assign state[1:0] = SW[1:0];
-	assign color[3:0] = KEY[3:0]
+	assign color[3:0] = KEY[3:0];
 
   // grid wires
 	wire [7:0] grid_VGA_R, grid_VGA_G, grid_VGA_B;
