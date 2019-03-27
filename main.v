@@ -29,8 +29,8 @@ module main(
     		VGA_R,   						//	VGA Red[9:0]
     		VGA_G,	 						//	VGA Green[9:0]
     		VGA_B,   						//	VGA Blue[9:0]
-        state,
-        level,
+        state_out,
+        level_out,
         level_n
 );
 
@@ -42,8 +42,8 @@ module main(
   output VGA_CLK;
 
   // game metadata output
-  output reg [0:6] state;
-  output wire [0:6] level;
+  output reg [0:6] state_out;
+  output wire [0:6] level_out;
   output reg [0:6] level_n;
 
   // inputs
@@ -136,14 +136,14 @@ module main(
 
 //----- set game state and difficulty level -----//
 
-	assign level = 7'b1110001; // L
+	assign level_out = 7'b1110001; // L
 	always@*
 		begin
-		case (state)
-		2'b00: state = 7'b1111010; //ready
-		2'b01: state = 7'b0000100; //game
-		2'b10: state = 7'b1100011; //user
-		default: state = 7'b1111111; //off
+		case (state_out)
+		2'b00: state_out = 7'b1111010; //ready
+		2'b01: state_out = 7'b0000100; //game
+		2'b10: state_out = 7'b1100011; //user
+		default: state_out = 7'b1111111; //off
 		endcase
 
 		case (level)
