@@ -3,10 +3,10 @@
 
 // supporting module coordinating grid
 
-module display_grid (colour, level, state, pix_x, pix_y, vga_R, vga_G, vga_B, video_on);
+module display_grid (color, level, state, pix_x, pix_y, vga_R, vga_G, vga_B, video_on);
 
 	input [1:0] state;
-	input [3:0] colour;
+	input [3:0] color;
 	input [2:0] level;
 	input [9:0] pix_x, pix_y;
 	output reg [7:0] vga_R, vga_G, vga_B;
@@ -225,7 +225,7 @@ always@*
 
 	assign num_on = (272<=pix_x && pix_x<=287 && 112<= pix_y && pix_y <= 127 && num_bit);
 
-//----- Colour Selection MUX -----//
+//----- color Selection MUX -----//
 	//check if there is input - indicates need for a bright signal
 	always@(state)
 		if (state[0] || state[1])
@@ -233,7 +233,7 @@ always@*
 		else
 			bright = 0;
 
-	//Produce colour when the pixel is in the range of the button.
+	//Produce color when the pixel is in the range of the button.
 	always@*
 	begin
 		if (bounding_box)
@@ -243,13 +243,13 @@ always@*
 			vga_G = 8'b11111111;
 			vga_B = 8'b11111111;
 			end
-			// based on input verus rest: assign lit versus unlit colour to each button.
+			// based on input verus rest: assign lit versus unlit color to each button.
 		else if (redB_on)
 		begin
 			video_on = 1;
 			vga_G = 8'b00000000;
 			vga_B = 8'b00000000;
-			if (bright && colour[2])
+			if (bright && color[2])
 				vga_R = 8'b11111111;
 			else
 				vga_R = 8'b01100000;
@@ -257,7 +257,7 @@ always@*
 		else if (yelB_on)
 		begin
 			video_on = 1;
-			if (bright && colour[1])
+			if (bright && color[1])
 			begin
 				vga_R = 8'b11111111;
 				vga_G = 8'b11111111;
@@ -275,7 +275,7 @@ always@*
 			video_on = 1;
 			vga_R = 8'b00000000;
 			vga_B = 8'b00000000;
-			if (bright && colour[0])
+			if (bright && color[0])
 				vga_G = 8'b11111111;
 			else
 				vga_G = 8'b01100000;
@@ -285,7 +285,7 @@ always@*
 			video_on = 1;
 			vga_R = 8'b00000000;
 			vga_G = 8'b00000000;
-			if (bright && colour[3])
+			if (bright && color[3])
 				vga_B = 8'b11111111;
 			else
 				vga_B = 8'b01100000;

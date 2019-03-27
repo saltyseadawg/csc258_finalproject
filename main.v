@@ -66,8 +66,8 @@ module main(
 //------Initialize VGA (modified code from Brandon Hill)------//
 	reg VGA_HS, VGA_VS;
 
-	wire CounterXmaxed = (pixel_x==799); //799 full width of field including front and back porches and sync
-	wire CounterYmaxed = (pixel_y==525); //525 full length of field including front and back porches and sync
+	wire xmax = (pixel_x==799); //799 full width of field including front and back porches and sync
+	wire ymax = (pixel_y==525); //525 full length of field including front and back porches and sync
 
   vga_adapter VGA(
 			.resetn(reset),
@@ -96,14 +96,14 @@ module main(
 	assign VGA_SYNC_N = 1;
 
 	always @(posedge CLOCK_50)
-		if(CounterXmaxed && ~CounterYmaxed)
+		if(xmax && ~ymax)
 			begin
 			pixel_x <= 0;
 			pixel_y <= pixel_y + 1;
 			end
-		else if (~CounterXmaxed)
+		else if (~xmax)
 			pixel_x <= pixel_x + 1;
-		else if (CounterXmaxed && CounterYmaxed)
+		else if (xmax && ymax)
 			begin
 			pixel_y <= 0;
 			pixel_x <= 0;
