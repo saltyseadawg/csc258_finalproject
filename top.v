@@ -74,7 +74,7 @@ module top
 	
 	wire [17:0] seq_wire;
 	wire [5:0] seq_counter_wire;
-	wire second;
+//	wire second;
 	
 	tile_LUT t0(
 		.seq(seq_wire),
@@ -101,7 +101,7 @@ module top
 		);
 		
 	graphics_control control(
-		.clock(second),
+		.clock(CLOCK_50),
 		.resetn(SW[9]),
 		.load(KEY[0]),
 		.ld_tile(load_tile),
@@ -123,11 +123,11 @@ module top
 		.difficulty(difficulty),
 		.seq(seq_wire)
 		);
-		
-	ratedivider rate(
-		.clk(CLOCK_50),
-		.pulse(second),
-		.load(SW[9])
-		);
+//		
+//	ratedivider rate(
+//		.clk(CLOCK_50),
+//		.pulse(second),
+//		.load(SW[9])
+//		);
 
 endmodule
