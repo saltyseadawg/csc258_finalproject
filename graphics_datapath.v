@@ -27,12 +27,12 @@ module graphics_datapath(clock, x_out, y_out, load, enable, resetn, x_in, y_in, 
 			y <= 8'b0;
 			colour <= 3'b000;
 		end
-		else begin
-			if (load)
-				x <= x_in;
-				y <= y_in;
-				colour <= colour_in;
-			if (flash)
+		if (load) begin
+			x <= x_in;
+			y <= y_in;
+			colour <= colour_in;
+		end
+		if (flash) begin
 				colour <= 3'b111;
 		end
 	end
