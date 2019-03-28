@@ -41,9 +41,11 @@ module graphics_control(clock, resetn, load, ld_tile, ld_flash, writeEnable, ran
 				load_tile 			= 5'd11,	//load top left tile 
 				transition 				= 5'd12,	
 				flash			= 5'd13,	//load tile flash colour
-				draw					 	= 5'd14,	
+				draw					 	= 5'd14,
+//				flash_delay = 5'd15,
 				load_previous = 5'd15,
-				draw_previous = 5'd16;
+				draw_previous = 5'd16,
+//				draw_previous_delay = 5'd18;
 
 	// State Table
 	always @(*) begin
@@ -202,17 +204,14 @@ module graphics_control(clock, resetn, load, ld_tile, ld_flash, writeEnable, ran
 	
 	//TODO: fix transition from draw to load so that colour doesn't change before coordinates change
 	always @(posedge clock) begin
-		if (writeEnable) begin
-			if ( write_counter >= 63) begin
-				write_counter <= 0;
-			end
-			else
-				write_counter <= write_counter + 1;
 		if (!resetn) begin
 			write_counter <= 0;
 		end
-		if (reset_write_counter)
+		if (reset_write_counter) begin
 			write_counter <= 0;
+		end
+		if (writeEnable) begin
+			write_counter <= write_counter + 1;
 		end
 	end
 	
