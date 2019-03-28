@@ -95,7 +95,7 @@ module graphics_control(clock, resetn, load, ld_tile, ld_flash, writeEnable, ran
 				if (write_counter < 63)
 					next_state = draw;
 				else
-					next_state = load_previous;
+					next_state = flash_delay;
 			end
 			flash_delay: begin
 				if (delay_done == 1)
