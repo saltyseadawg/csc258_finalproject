@@ -106,7 +106,8 @@ module top
 	graphics_control control(
 		.clock(CLOCK_50),
 		.resetn(SW[9]),
-		.load(KEY[0]),
+		.load(SW[0]),
+		.load_level(SW[1]),
 		.ld_tile(load_tile),
 		.ld_flash(flash),
 		.ld_previous(ld_previous_wire),
