@@ -61,10 +61,11 @@ module top
 	wire [2:0] lut_colour;
 	wire writeEN;
 	wire randomEN;
-	wire counter;
+	wire counter_wire;
 	wire [1:0] tile;
 	wire flash;
 	wire load_tile;
+	wire ld_previous_wire;
 	wire [1:0] start_tiles;
 	wire [1:0] random_in;
 	wire [8:0] difficulty;
@@ -74,7 +75,8 @@ module top
 	
 	wire [17:0] seq_wire;
 	wire [5:0] seq_counter_wire;
-//	wire second;
+	
+	wire delay_done_wire, delayEN_wire, ld_delay_wire; //delay_counter wires
 	
 	tile_LUT t0(
 		.seq(seq_wire),
@@ -91,30 +93,36 @@ module top
 		.x_out(vga_x),
 		.y_out(vga_y),
 		.load(load_tile),
-		.enable(counter),
+		.enable(counter_wire),
 		.resetn(SW[9]),
 		.x_in(lut_x),
 		.y_in(lut_y),
 		.flash(flash),
 		.colour_out(colour),
-		.colour_in(lut_colour)
+		.colour_in(lut_colour),
+		.ld_previous(ld_previous_wire)
 		);
 		
 	graphics_control control(
 		.clock(CLOCK_50),
 		.resetn(SW[9]),
-		.load(KEY[0]),
+		.load(SW[0]),
+		.load_level(SW[1]),
 		.ld_tile(load_tile),
 		.ld_flash(flash),
+		.ld_previous(ld_previous_wire),
 		.writeEnable(writeEN),
 		.randomEnable(randomEN),
-		.counterEnable(counter),
+		.counterEnable(counter_wire),
 		.tile_num(start_tiles),
 		.easy(KEY[1]),
 		.normal(KEY[2]),
 		.hard(KEY[3]),
 		.sequence_counter(seq_counter_wire),
-		.difficulty(difficulty)
+		.difficulty(difficulty),
+		.delayEN(delayEN_wire),
+		.ld_delay(ld_delay_wire),
+		.delay_done(delay_done_wire)
 		);
 		
 	random_generator random_gen(
@@ -122,6 +130,13 @@ module top
 		.randEN(randomEN),
 		.difficulty(difficulty),
 		.seq(seq_wire)
+		);
+		
+	delay_counter dc(
+		.clk(CLOCK_50),
+		.delayEN(delayEN_wire),
+		.ld_delay(ld_delay_wire),
+		.delay_done(delay_done_wire)
 		);
 //		
 //	ratedivider rate(
