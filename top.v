@@ -61,7 +61,7 @@ module top
 	wire [2:0] lut_colour;
 	wire writeEN;
 	wire randomEN;
-	wire counter;
+	wire counter_wire;
 	wire [1:0] tile;
 	wire flash;
 	wire load_tile;
@@ -93,7 +93,7 @@ module top
 		.x_out(vga_x),
 		.y_out(vga_y),
 		.load(load_tile),
-		.enable(counter),
+		.enable(counter_wire),
 		.resetn(SW[9]),
 		.x_in(lut_x),
 		.y_in(lut_y),
@@ -113,7 +113,7 @@ module top
 		.ld_previous(ld_previous_wire),
 		.writeEnable(writeEN),
 		.randomEnable(randomEN),
-		.counterEnable(counter),
+		.counterEnable(counter_wire),
 		.tile_num(start_tiles),
 		.easy(KEY[1]),
 		.normal(KEY[2]),

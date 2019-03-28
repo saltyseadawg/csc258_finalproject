@@ -108,7 +108,7 @@ module graphics_control(clock, resetn, load, ld_tile, ld_flash, writeEnable, ran
 				if (write_counter < 63)
 					next_state = draw_previous;
 				else
-					next_state = load_tile;
+					next_state = draw_previous_delay;
 			end
 			draw_previous_delay: begin
 				if (delay_done == 1)
@@ -170,6 +170,7 @@ module graphics_control(clock, resetn, load, ld_tile, ld_flash, writeEnable, ran
 				writeEnable = 1'b1;
 				counterEnable = 1'b1;
 				seqEN = 1'b1;
+				ld_delay = 1'b1;
 			end
 			draw_previous_delay: begin
 				delayEN = 1'b1;

@@ -1,6 +1,5 @@
 //data path for graphics
 //TODO: figure out which coordinates to write to -lab moniter is 1680 x 1050 (currently default to (0,0) for testing purposes)
-//TODO: timing issues - make datapath use a faster clock than control so that all pixels properly written?
 
 module graphics_datapath(clock, x_out, y_out, load, enable, resetn, x_in, y_in, flash, colour_in, colour_out, ld_previous);
 
@@ -50,15 +49,17 @@ module graphics_datapath(clock, x_out, y_out, load, enable, resetn, x_in, y_in, 
 	
 	
 	always @(posedge clock) begin
-		if(!resetn)
+		if(!resetn) begin
 			counter <= 6'b000000;
-		else if (enable)
+		end
+		if (enable) begin
 			if (load) begin
 				counter <= 6'b000000;
 			end
 			else begin
 				counter <= counter + 1'b1;
 			end
+		end
 	end
 			
 	
