@@ -1,16 +1,18 @@
 //control unit for graphics
 
-module graphics_control(clock, resetn, load, ld_tile, ld_flash, writeEnable, randomEnable, counterEnable, tile_num, easy, normal, hard, sequence_counter, difficulty);
+module graphics_control(clock, resetn, load, ld_tile, ld_flash, writeEnable, randomEnable, counterEnable, tile_num, easy, normal, hard, sequence_counter, difficulty, delayEN, ld_delay, delay_done, ld_previous);
 	input clock;
 	input resetn;
 	input load;
 	input easy, normal, hard; //keys to indicate levels
+	input delay_done;
 
-	output reg ld_tile, ld_flash;
+	output reg ld_tile, ld_flash, ld_previous; //datapath signals
 	output reg writeEnable; 
 	output reg randomEnable;
 	output reg counterEnable; //paint counter
 	output reg [1:0] tile_num;
+	output reg delayEN, ld_delay; //delay_counter signals
 
 	reg [6:0] write_counter;
 	reg levelEN, seqEN, reset_write_counter;
@@ -42,9 +44,9 @@ module graphics_control(clock, resetn, load, ld_tile, ld_flash, writeEnable, ran
 				transition 				= 5'd12,	
 				flash			= 5'd13,	//load tile flash colour
 				draw					 	= 5'd14,
-//				flash_delay = 5'd15,
-				load_previous = 5'd15,
-				draw_previous = 5'd16,
+				flash_delay = 5'd15,
+				load_previous = 5'd16,
+				draw_previous = 5'd17;
 //				draw_previous_delay = 5'd18;
 
 	// State Table
@@ -95,6 +97,12 @@ module graphics_control(clock, resetn, load, ld_tile, ld_flash, writeEnable, ran
 				else
 					next_state = load_previous;
 			end
+			flash_delay: begin
+				if (delay_done == 1)
+					next_state = load_previous;
+				else 
+					next_state = flash_delay;
+			end
 			load_previous: next_state = draw_previous;
 			draw_previous: begin
 				if (write_counter < 63)
@@ -116,6 +124,9 @@ module graphics_control(clock, resetn, load, ld_tile, ld_flash, writeEnable, ran
 		levelEN = 1'b0;
 		seqEN = 1'b0;
 		reset_write_counter = 1'b0;
+		delayEN = 1'b0;
+		ld_delay = 1'b0;
+		ld_previous = 1'b0;
 		
 		case (curr_state)
 			bootup: begin
@@ -137,12 +148,16 @@ module graphics_control(clock, resetn, load, ld_tile, ld_flash, writeEnable, ran
 				ld_flash = 1'b1;
 				reset_write_counter = 1'b1;
 			end
+			flash_delay: begin
+				delayEN = 1'b1;
+			end
 			draw: begin
 				writeEnable = 1'b1;
 				counterEnable = 1'b1;
+				ld_delay = 1'b1;
 			end
 			load_previous: begin
-				ld_tile = 1'b1;
+				ld_previous = 1'b1;
 				reset_write_counter = 1'b1;
 			end
 			draw_previous: begin
