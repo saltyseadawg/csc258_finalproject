@@ -1,9 +1,9 @@
 //control unit for graphics
 
-module graphics_control(clock, resetn, load, ld_tile, ld_flash, writeEnable, randomEnable, counterEnable, tile_num, easy, normal, hard, sequence_counter, difficulty, delayEN, ld_delay, delay_done, ld_previous);
+module graphics_control(clock, resetn, load, ld_tile, ld_flash, writeEnable, randomEnable, counterEnable, tile_num, easy, normal, hard, sequence_counter, difficulty, delayEN, ld_delay, delay_done, ld_previous, load_level);
 	input clock;
 	input resetn;
-	input load;
+	input load, load_level;
 	input easy, normal, hard; //keys to indicate levels
 	input delay_done;
 
@@ -46,13 +46,13 @@ module graphics_control(clock, resetn, load, ld_tile, ld_flash, writeEnable, ran
 				draw					 	= 5'd14,
 				flash_delay = 5'd15,
 				load_previous = 5'd16,
-				draw_previous = 5'd17;
-//				draw_previous_delay = 5'd18;
+				draw_previous = 5'd17,
+				draw_previous_delay = 5'd18;
 
 	// State Table
 	always @(*) begin
 		case (curr_state)
-			bootup: next_state = ~load ? load_t0 : bootup;
+			bootup: next_state = load ? load_t0 : bootup;
 			load_t0: next_state = draw_t0;
 			draw_t0: begin
 				if (write_counter < 63)
@@ -81,7 +81,7 @@ module graphics_control(clock, resetn, load, ld_tile, ld_flash, writeEnable, ran
 				else
 					next_state = level_select;
 			end
-			level_select: next_state = ~load ? generate_sequence : level_select;
+			level_select: next_state = load_level ? generate_sequence : level_select;
 			generate_sequence: next_state = load_tile;
 			load_tile: begin
 				if (sequence_counter < difficulty) 
@@ -109,6 +109,12 @@ module graphics_control(clock, resetn, load, ld_tile, ld_flash, writeEnable, ran
 					next_state = draw_previous;
 				else
 					next_state = load_tile;
+			end
+			draw_previous_delay: begin
+				if (delay_done == 1)
+					next_state = load_tile;
+				else
+					next_state = draw_previous_delay;
 			end
 		endcase
 	end
@@ -164,6 +170,9 @@ module graphics_control(clock, resetn, load, ld_tile, ld_flash, writeEnable, ran
 				writeEnable = 1'b1;
 				counterEnable = 1'b1;
 				seqEN = 1'b1;
+			end
+			draw_previous_delay: begin
+				delayEN = 1'b1;
 			end
 			load_t0: begin
 				tile_num = 2'b00;
@@ -231,8 +240,13 @@ module graphics_control(clock, resetn, load, ld_tile, ld_flash, writeEnable, ran
 	end
 	
 	//TODO: figure out how to reset sequence_counter w/o multiple constant driver error
-	always @(posedge seqEN) begin
-			sequence_counter <= sequence_counter + 1;
+	always @(posedge seqEN, negedge resetn) begin
+			if (!resetn) begin
+				sequence_counter <= 0;
+			end 
+			else begin
+				sequence_counter <= sequence_counter + 1;
+			end
 	end
 	
 	
