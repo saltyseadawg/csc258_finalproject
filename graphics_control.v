@@ -1,23 +1,25 @@
 //control unit for graphics
 
-module graphics_control(clock, resetn, load, ld_tile, ld_flash, writeEnable, randomEnable, counterEnable, tile_num, easy, normal, hard, sequence_counter, difficulty, delayEN, ld_delay, delay_done, ld_previous, load_level, ld_correct, checkEN);
+module graphics_control(clock, resetn, load, ld_tile, ld_flash, writeEnable, randomEnable, counterEnable, tile_num, easy, normal, hard, sequence_counter, difficulty, delayEN, ld_delay, delay_done, ld_previous, load_level, ld_correct, checkEN, player_input, playerEN, check);
 	input clock;
 	input resetn;
 	input load, load_level;
 	input easy, normal, hard; //keys to indicate levels
 	input delay_done;
+	input player_input;
+	input check;
 
 	output reg ld_tile, ld_flash, ld_previous, ld_correct; //datapath signals
-	output reg writeEnable; 
+	output reg writeEnable;
 	output reg randomEnable;
 	output reg counterEnable; //paint counter
 	output reg [1:0] tile_num;
 	output reg delayEN, ld_delay; //delay_counter signals
-	output reg checkEN, playerEN;//player signals 
+	output reg checkEN, playerEN;//player signals
 
 	reg [6:0] write_counter; //keeps track of number of pixels drawn
 	reg levelEN; //enable level pick
-	reg seqEN; //trigger sequence counter
+	reg seqEN, reset_seqEN; //trigger sequence counter
 	reg reset_write_counter;
 	reg [5:0] curr_state, next_state;
 	//output reg [9:0] difficulty;
@@ -30,9 +32,9 @@ module graphics_control(clock, resetn, load, ld_tile, ld_flash, writeEnable, ran
 		sequence_counter = 0;
 		difficulty = 3;
 	end
-	
+
 	// States
-	localparam bootup			= 5'd0, 
+	localparam bootup			= 5'd0,
 				load_t0 = 5'd1,
 				draw_t0 = 5'd2,
 				load_t1 = 5'd3,
@@ -43,24 +45,25 @@ module graphics_control(clock, resetn, load, ld_tile, ld_flash, writeEnable, ran
 				draw_t3 = 5'd8,
 				level_select 	= 5'd9, //choose difficulty
 				generate_sequence = 5'd10,
-				load_tile 			= 5'd11,	//load top left tile 
-				transition 				= 5'd12,	
+				load_tile 			= 5'd11,	//load top left tile
+				transition 				= 5'd12,
 				flash			= 5'd13,	//load tile flash colour
 				draw					 	= 5'd14,
-				flash_delay = 5'd15, 
+				flash_delay = 5'd15,
 				load_previous = 5'd16, //load previous tile to be drawn
 				draw_previous = 5'd17,
 				draw_previous_delay = 5'd18,
-				player = 5'd19, //player turn
-				player_check = 5'd20, //check player input
-				load_correct = 5'd21, //load correctly guessed tile
-				flash_correct = 5'd22,
-				draw_correct = 5'd23,
-				flash_correct_delay = 5'd24,
-				load_previous_correct = 5'd25,
-				draw_previous_correct = 5'd26,
-				draw_previous_correct_delay = 5'd27;
-				
+				transition_player = 5'd19,
+				player = 5'd20, //player turn
+				player_check = 5'd21, //check player input
+				load_correct = 5'd22, //load correctly guessed tile
+				flash_correct = 5'd23,
+				draw_correct = 5'd24,
+				flash_correct_delay = 5'd25,
+				load_previous_correct = 5'd26,
+				draw_previous_correct = 5'd27,
+				draw_previous_correct_delay = 5'd28;
+
 
 	// State Table
 	always @(*) begin
@@ -97,10 +100,10 @@ module graphics_control(clock, resetn, load, ld_tile, ld_flash, writeEnable, ran
 			level_select: next_state = load_level ? generate_sequence : level_select;
 			generate_sequence: next_state = load_tile;
 			load_tile: begin
-				if (sequence_counter < difficulty) 
+				if (sequence_counter < difficulty)
 					next_state = transition;
 				else
-					next_state = level_select;
+					next_state = transition_player;
 			end
 			transition: next_state = flash; //buffer for load time
 			flash: next_state = draw;
@@ -113,7 +116,7 @@ module graphics_control(clock, resetn, load, ld_tile, ld_flash, writeEnable, ran
 			flash_delay: begin
 				if (delay_done == 1)
 					next_state = load_previous;
-				else 
+				else
 					next_state = flash_delay;
 			end
 			load_previous: next_state = draw_previous;
@@ -125,14 +128,15 @@ module graphics_control(clock, resetn, load, ld_tile, ld_flash, writeEnable, ran
 			end
 			draw_previous_delay: begin
 				if (delay_done == 1)
-					next_state = player;
+					next_state = load_tile;
 				else
 					next_state = draw_previous_delay;
 			end
+			transition_player: next_state = player;
 			player: begin
-				if (seq_counter > difficulty)
+				if (sequence_counter >= difficulty)
 					next_state = level_select;
-				if (player_input == 1)
+				if (player_input == 1) //check if player pressed a button
 					next_state = player_check;
 				else
 					next_state = player;
@@ -158,7 +162,7 @@ module graphics_control(clock, resetn, load, ld_tile, ld_flash, writeEnable, ran
 			flash_correct_delay: begin
 				if (delay_done == 1)
 					next_state = load_previous_correct;
-				else 
+				else
 					next_state = flash_correct_delay;
 			end
 			load_previous_correct: begin
@@ -173,11 +177,11 @@ module graphics_control(clock, resetn, load, ld_tile, ld_flash, writeEnable, ran
 			draw_previous_correct_delay: begin
 				if (delay_done == 1)
 					next_state = player;
-				else 
+				else
 					next_state = draw_previous_correct_delay;
 			end
-			
-			
+
+
 		endcase
 	end
 
@@ -189,8 +193,9 @@ module graphics_control(clock, resetn, load, ld_tile, ld_flash, writeEnable, ran
 		randomEnable = 1'b0;
 		counterEnable = 1'b0;
 		tile_num = 2'b00;
-		levelEN = 1'b0; 
+		levelEN = 1'b0;
 		seqEN = 1'b0;
+		reset_seqEN = 1'b0;
 		reset_write_counter = 1'b0;
 		delayEN = 1'b0;
 		ld_delay = 1'b0;
@@ -198,7 +203,7 @@ module graphics_control(clock, resetn, load, ld_tile, ld_flash, writeEnable, ran
 		ld_correct = 1'b0;
 		playerEN = 1'b0;
 		checkEN = 1'b0;
-		
+
 		case (curr_state)
 			bootup: begin
 			end
@@ -269,13 +274,16 @@ module graphics_control(clock, resetn, load, ld_tile, ld_flash, writeEnable, ran
 			draw_previous_correct_delay: begin
 				ld_delay = 1'b1;
 			end
+			transition_player: begin
+				reset_seqEN = 1'b1;
+			end
 			player: begin
 				playerEN = 1'b1;
 			end
 			player_check: begin
 				checkEN = 1'b1;
 			end
-	//------BOOTUP LOADS AND DRAWS------//		
+	//------BOOTUP LOADS AND DRAWS------//
 			load_t0: begin
 				tile_num = 2'b00;
 				ld_tile = 1;
@@ -312,11 +320,11 @@ module graphics_control(clock, resetn, load, ld_tile, ld_flash, writeEnable, ran
 				writeEnable = 1;
 				counterEnable = 1;
 			end
-			
+
 		endcase
-	end			
-	
-	
+	end
+
+
 	//select difficulty
 	always @(posedge clock) begin
 		if (levelEN) begin
@@ -327,9 +335,9 @@ module graphics_control(clock, resetn, load, ld_tile, ld_flash, writeEnable, ran
 			if (~hard)
 					difficulty = 9;
 		end
-			
+
 	end
-	
+
 	//TODO: fix transition from draw to load so that colour doesn't change before coordinates change
 	always @(posedge clock) begin
 		if (!resetn) begin
@@ -342,18 +350,20 @@ module graphics_control(clock, resetn, load, ld_tile, ld_flash, writeEnable, ran
 			write_counter <= write_counter + 1;
 		end
 	end
-	
-	//TODO: figure out how to reset sequence_counter w/o multiple constant driver error
-	always @(posedge seqEN, negedge resetn) begin
+
+	always @(posedge seqEN, negedge resetn, posedge reset_seqEN) begin
 			if (!resetn) begin
 				sequence_counter <= 0;
-			end 
+			end
+			if (reset_seqEN) begin
+				sequence_counter <= 0;
+			end
 			else begin
 				sequence_counter <= sequence_counter + 1;
 			end
 	end
-	
-	
+
+
 	// Current State Register
 	always @(posedge clock) begin
 		if (!resetn) begin
