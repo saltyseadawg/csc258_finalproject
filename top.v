@@ -30,8 +30,8 @@ module top
 	output	[9:0]	VGA_R;   				//	VGA Red[9:0]
 	output	[9:0]	VGA_G;	 				//	VGA Green[9:0]
 	output	[9:0]	VGA_B;   				//	VGA Blue[9:0]
-	
-	
+
+
 	vga_adapter VGA(
 			.resetn(SW[9]),
 			.clock(CLOCK_50),
@@ -69,23 +69,29 @@ module top
 	wire [1:0] start_tiles;
 	wire [1:0] random_in;
 	wire [8:0] difficulty;
-	
+
 	reg [17:0] random_seq;
 	reg [5:0] seq_counter;
-	
+
 	wire [17:0] seq_wire;
 	wire [5:0] seq_counter_wire;
-	
+
 	wire delay_done_wire, delayEN_wire, ld_delay_wire; //delay_counter wires
-	
+
+	wire playerEN_wire, checkEN_wire, check_wire, player_input_wire; //player wires
+	wire load_correct_wire;
+	wire [1:0] correct_wire;
+
 	tile_LUT t0(
 		.seq(seq_wire),
 		.counter(seq_counter_wire),
-		.x(lut_x), //output to 
-		.y(lut_y), //output to 
+		.x(lut_x), //output to
+		.y(lut_y), //output to
 		.colour(lut_colour), //output to
 		.load_random(randomEN),
-		.boot(start_tiles)
+		.boot(start_tiles),
+		.correct(correct_wire),
+		.load_correct(load_correct_wire)
 		);
 
 	graphics_datapath data(
@@ -102,7 +108,7 @@ module top
 		.colour_in(lut_colour),
 		.ld_previous(ld_previous_wire)
 		);
-		
+
 	graphics_control control(
 		.clock(CLOCK_50),
 		.resetn(SW[9]),
@@ -122,23 +128,40 @@ module top
 		.difficulty(difficulty),
 		.delayEN(delayEN_wire),
 		.ld_delay(ld_delay_wire),
-		.delay_done(delay_done_wire)
+		.delay_done(delay_done_wire),
+		.checkEN(checkEN_wire),
+		.player_input(player_input_wire),
+		.playerEN(playerEN_wire),
+		.ld_correct(load_correct_wire),
+		.check(check_wire)
 		);
-		
+
 	random_generator random_gen(
 		.clock(CLOCK_50),
 		.randEN(randomEN),
 		.difficulty(difficulty),
 		.seq(seq_wire)
 		);
-		
+
 	delay_counter dc(
 		.clk(CLOCK_50),
 		.delayEN(delayEN_wire),
 		.ld_delay(ld_delay_wire),
 		.delay_done(delay_done_wire)
 		);
-//		
+
+	player p0(
+		.seq(seq_wire),
+		.seq_counter(seq_counter_wire),
+		.check(check_wire),
+		.playerEN(playerEN_wire),
+		.checkEN(checkEN_wire),
+		.KEY(KEY),
+		.clk(CLOCK_50),
+		.player_input(player_input_wire),
+		.tile_selected(correct_wire)
+		);
+//
 //	ratedivider rate(
 //		.clk(CLOCK_50),
 //		.pulse(second),
