@@ -1,4 +1,4 @@
-module player(seq, check, seq_counter, playerEN, checkEN, KEY, clk, player_input, tile_selected);
+module player(seq, check, seq_counter, playerEN, checkEN, KEY, clk, player_input);
 	input [3:0] KEY;
 	input [17:0] seq;
 	input [5:0] seq_counter;
@@ -7,7 +7,7 @@ module player(seq, check, seq_counter, playerEN, checkEN, KEY, clk, player_input
 
 	output reg player_input;
 	output reg check;
-	output reg [1:0] tile_selected;
+	reg [1:0] tile_selected;
 
 	// get player input
 	always @(posedge clk) begin
