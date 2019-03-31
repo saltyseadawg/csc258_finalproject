@@ -53,119 +53,106 @@ module top
 		defparam VGA.BITS_PER_COLOUR_CHANNEL = 1;
 		defparam VGA.BACKGROUND_IMAGE = "black.mif";
 //-------------------VGA end---------------------------------//
-	wire [7:0] lut_x;
-	wire [7:0] lut_y;
-	wire [7:0] vga_x;
-	wire [7:0] vga_y;
-	wire [2:0] colour;
-	wire [2:0] lut_colour;
-	wire writeEN;
-	wire randomEN;
-	wire counter_wire;
-	wire [1:0] tile;
-	wire flash;
-	wire load_tile;
-	wire ld_previous_wire;
-	wire [1:0] start_tiles;
-	wire [1:0] random_in;
-	wire [8:0] difficulty;
+wire [7:0] lut_x;
+wire [7:0] lut_y;
+wire [7:0] vga_x;
+wire [7:0] vga_y;
+wire [2:0] colour;
+wire [2:0] lut_colour;
+wire writeEN;
+wire randomEN;
+wire counter_wire;
+wire [1:0] tile;
+wire flash;
+wire load_tile;
+wire ld_previous_wire;
+wire [1:0] start_tiles;
+wire [1:0] random_in;
+wire [4:0] difficulty;
 
-	reg [17:0] random_seq;
-	reg [5:0] seq_counter;
+reg [5:0] seq_counter;
 
-	wire [17:0] seq_wire;
-	wire [5:0] seq_counter_wire;
+wire [17:0] seq_wire;
+wire [5:0] seq_counter_wire;
 
-	wire delay_done_wire, delayEN_wire, ld_delay_wire; //delay_counter wires
+wire delay_done_wire, delayEN_wire, ld_delay_wire; //delay_counter wires
 
-	wire playerEN_wire, checkEN_wire, check_wire, player_input_wire; //player wires
-	wire load_correct_wire;
-	wire [1:0] correct_wire;
+wire playerEN_wire, checkEN_wire, check_wire, player_input_wire; //player wires
+wire [1:0] tile_wire;
 
-	tile_LUT t0(
-		.seq(seq_wire),
-		.counter(seq_counter_wire),
-		.x(lut_x), //output to
-		.y(lut_y), //output to
-		.colour(lut_colour), //output to
-		.load_random(randomEN),
-		.boot(start_tiles),
-		.correct(correct_wire),
-		.load_correct(load_correct_wire)
-		);
+tile_LUT t0(
+	.x(lut_x), //output to
+	.y(lut_y), //output to
+	.colour(lut_colour), //output to
+	.tile(tile_wire)
+	);
 
-	graphics_datapath data(
-		.clock(CLOCK_50),
-		.x_out(vga_x),
-		.y_out(vga_y),
-		.load(load_tile),
-		.enable(counter_wire),
-		.resetn(SW[9]),
-		.x_in(lut_x),
-		.y_in(lut_y),
-		.flash(flash),
-		.colour_out(colour),
-		.colour_in(lut_colour),
-		.ld_previous(ld_previous_wire)
-		);
+graphics_datapath data(
+	.clock(CLOCK_50),
+	.x_out(vga_x),
+	.y_out(vga_y),
+	.load(load_tile),
+	.enable(counter_wire),
+	.resetn(SW[9]),
+	.x_in(lut_x),
+	.y_in(lut_y),
+	.flash(flash),
+	.colour_out(colour),
+	.colour_in(lut_colour),
+	.ld_previous(ld_previous_wire)
+	);
 
-	graphics_control control(
-		.clock(CLOCK_50),
-		.resetn(SW[9]),
-		.load(SW[0]),
-		.load_level(SW[1]),
-		.ld_tile(load_tile),
-		.ld_flash(flash),
-		.ld_previous(ld_previous_wire),
-		.writeEnable(writeEN),
-		.randomEnable(randomEN),
-		.counterEnable(counter_wire),
-		.tile_num(start_tiles),
-		.easy(KEY[1]),
-		.normal(KEY[2]),
-		.hard(KEY[3]),
-		.sequence_counter(seq_counter_wire),
-		.difficulty(difficulty),
-		.delayEN(delayEN_wire),
-		.ld_delay(ld_delay_wire),
-		.delay_done(delay_done_wire),
-		.checkEN(checkEN_wire),
-		.player_input(player_input_wire),
-		.playerEN(playerEN_wire),
-		.ld_correct(load_correct_wire),
-		.check(check_wire)
-		);
+graphics_control control(
+	.clock(CLOCK_50),
+	.resetn(SW[9]),
+	.load(SW[0]),
+	.load_level(SW[1]),
+	.ld_tile(load_tile),
+	.ld_flash(flash),
+	.ld_previous(ld_previous_wire),
+	.writeEnable(writeEN),
+	.randomEnable(randomEN),
+	.counterEnable(counter_wire),
+	.tile_num(tile_wire),
+	.easy(KEY[1]),
+	.normal(KEY[2]),
+	.hard(KEY[3]),
+	.player_start(SW[2]),
+	.sequence_counter(seq_counter_wire),
+	.difficulty(difficulty),
+	.delayEN(delayEN_wire),
+	.ld_delay(ld_delay_wire),
+	.delay_done(delay_done_wire),
+	.checkEN(checkEN_wire),
+	.player_input(player_input_wire),
+	.playerEN(playerEN_wire),
+	.check(check_wire),
+	.seq(seq_wire)
+	);
 
-	random_generator random_gen(
-		.clock(CLOCK_50),
-		.randEN(randomEN),
-		.difficulty(difficulty),
-		.seq(seq_wire)
-		);
+random_generator random_gen(
+	.clock(CLOCK_50),
+	.randEN(randomEN),
+	.difficulty(difficulty),
+	.seq(seq_wire)
+	);
 
-	delay_counter dc(
-		.clk(CLOCK_50),
-		.delayEN(delayEN_wire),
-		.ld_delay(ld_delay_wire),
-		.delay_done(delay_done_wire)
-		);
+delay_counter dc(
+	.clk(CLOCK_50),
+	.delayEN(delayEN_wire),
+	.ld_delay(ld_delay_wire),
+	.delay_done(delay_done_wire)
+	);
 
-	player p0(
-		.seq(seq_wire),
-		.seq_counter(seq_counter_wire),
-		.check(check_wire),
-		.playerEN(playerEN_wire),
-		.checkEN(checkEN_wire),
-		.KEY(KEY),
-		.clk(CLOCK_50),
-		.player_input(player_input_wire),
-		.tile_selected(correct_wire)
-		);
-//
-//	ratedivider rate(
-//		.clk(CLOCK_50),
-//		.pulse(second),
-//		.load(SW[9])
-//		);
+player p0(
+	.seq(seq_wire),
+	.seq_counter(seq_counter_wire),
+	.check(check_wire),
+	.playerEN(playerEN_wire),
+	.checkEN(checkEN_wire),
+	.KEY(KEY),
+	.clk(CLOCK_50),
+	.player_input(player_input_wire)
+	);
 
 endmodule
