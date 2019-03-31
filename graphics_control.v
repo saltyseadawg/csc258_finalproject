@@ -1,6 +1,18 @@
 //control unit for graphics
 
-module graphics_control(clock, resetn, load, ld_tile, ld_flash, writeEnable, randomEnable, counterEnable, tile_num, easy, normal, hard, sequence_counter, difficulty, delayEN, ld_delay, delay_done, ld_previous, load_level, checkEN, player_input, player_start, playerEN, check, seq);
+module graphics_control(
+	clock, resetn,
+	load, ld_tile, ld_flash, writeEnable,
+	randomEnable, counterEnable, tile_num,
+	easy, normal, hard, difficulty,
+	delayEN, ld_delay, delay_done,
+	ld_previous, load_level,
+	checkEN, check,
+	player_input, player_start, playerEN,
+	seq, sequence_counter,
+	ld_current_score, ld_best_score
+	);
+
 	input clock;
 	input resetn;
 	input load, load_level;
@@ -10,6 +22,7 @@ module graphics_control(clock, resetn, load, ld_tile, ld_flash, writeEnable, ran
 	input check;
 	input [17:0] seq;
 
+	output reg ld_current_score, ld_best_score;
 	output reg ld_tile, ld_flash, ld_previous; //datapath signals
 	output reg writeEnable;
 	output reg randomEnable;
@@ -22,11 +35,10 @@ module graphics_control(clock, resetn, load, ld_tile, ld_flash, writeEnable, ran
 	reg levelEN; //enable level pick
 	reg seqEN, reset_seqEN; //trigger sequence counter
 	reg reset_write_counter;
-	reg [6:0] curr_state, next_state;
-	reg [3:0] score_counter;
+	reg [5:0] curr_state, next_state;
 	//output reg [9:0] difficulty;
 	output reg [4:0] difficulty;
-	output reg [5:0] sequence_counter; //
+	output reg [3:0] sequence_counter; //
 
 	//ensure difficulty starts with value;
 	initial begin
@@ -67,8 +79,7 @@ module graphics_control(clock, resetn, load, ld_tile, ld_flash, writeEnable, ran
 				load_previous_correct = 5'd28,
 				draw_previous_correct = 5'd29,
 				draw_previous_correct_delay = 5'd30,
-				sequence_increase_player = 5'd31,
-				win = 5'd32; //TODO: add highscore states
+				sequence_increase_player = 5'd31;
 
 
 	// State Table
@@ -142,7 +153,7 @@ module graphics_control(clock, resetn, load, ld_tile, ld_flash, writeEnable, ran
 			transition_player: next_state = player_start ? player : transition_player;
 			player: begin
 				if (sequence_counter >= difficulty)
-					next_state = win;
+					next_state = level_select;
 				else if (player_input == 1) //check if player pressed a button
 					next_state = player_check_load;
 				else
@@ -184,9 +195,9 @@ module graphics_control(clock, resetn, load, ld_tile, ld_flash, writeEnable, ran
 			end
 			draw_previous_correct_delay: begin
 				if (delay_done == 1)
-					next_state = player;
-				else
 					next_state = sequence_increase_player;
+				else
+					next_state = draw_previous_correct_delay;
 			end
 			sequence_increase_player: next_state = player;
 		endcase
@@ -209,6 +220,8 @@ module graphics_control(clock, resetn, load, ld_tile, ld_flash, writeEnable, ran
 		ld_previous = 1'b0;
 		playerEN = 1'b0;
 		checkEN = 1'b0;
+		ld_best_score = 1'b0;
+		ld_current_score = 1'b0;
 
 		case (curr_state)
 			bootup: begin
@@ -280,13 +293,15 @@ module graphics_control(clock, resetn, load, ld_tile, ld_flash, writeEnable, ran
 				ld_delay = 1'b1;
 			end
 			draw_previous_correct_delay: begin
-				ld_delay = 1'b1;
+			 	delayEN = 1'b1;
 			end
 			transition_player: begin
 				reset_seqEN = 1'b1;
 			end
 			player: begin
 				playerEN = 1'b1;
+				ld_current_score = 1'b1;
+				ld_best_score = 1'b1;
 			end
 			player_check_load: begin
 				checkEN = 1'b1;
@@ -332,9 +347,6 @@ module graphics_control(clock, resetn, load, ld_tile, ld_flash, writeEnable, ran
 			draw_t3: begin
 				writeEnable = 1;
 				counterEnable = 1;
-			end
-	//-------highscores-------//
-			win: begin //TODO: complete win state
 			end
 		endcase
 	end
