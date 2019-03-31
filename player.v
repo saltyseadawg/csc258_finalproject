@@ -1,9 +1,10 @@
-module player(seq, check, seq_counter, playerEN, checkEN, KEY, clk, player_input);
-	input [3:0] KEY;
+module player(seq, check, seq_counter, playerEN, checkEN, q, w, a, s, clk, player_input);
+	// input [3:0] KEY;
 	input [17:0] seq;
 	input [3:0] seq_counter;
 	input playerEN, checkEN;
 	input clk;
+	input q, w, a, s;
 
 	output reg player_input;
 	output reg check;
@@ -12,19 +13,19 @@ module player(seq, check, seq_counter, playerEN, checkEN, KEY, clk, player_input
 	// get player input
 	always @(posedge clk) begin
 		if (playerEN) begin
-			if (~KEY[0]) begin
+			if (q) begin
 				player_input <= 1;
 				tile_selected <= 0;
 			end
-			if (~KEY[1]) begin
+			if (w) begin
 				player_input <= 1;
 				tile_selected <= 1;
 			end
-			if (~KEY[2]) begin
+			if (a) begin
 				player_input <= 1;
 				tile_selected <= 2;
 			end
-			if (~KEY[3]) begin
+			if (s) begin
 				player_input <= 1;
 				tile_selected	<= 3;
 			end
