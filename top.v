@@ -1,6 +1,8 @@
 
 module top
 (
+		HEX0,
+		HEX3,
 		CLOCK_50,						//	On Board 50 MHz
 		// Your inputs and outputs here
         KEY,
@@ -19,6 +21,7 @@ module top
 	input			CLOCK_50;				//	50 MHz
 	input   [9:0]   SW;
 	input   [3:0]   KEY;
+	output [6:0] HEX0, HEX3;
 
 	// Declare your inputs and outputs here
 	// Do not change the following outputs
@@ -70,15 +73,14 @@ wire [1:0] start_tiles;
 wire [1:0] random_in;
 wire [4:0] difficulty;
 
-reg [5:0] seq_counter;
-
 wire [17:0] seq_wire;
-wire [5:0] seq_counter_wire;
+wire [3:0] seq_counter_wire;
 
 wire delay_done_wire, delayEN_wire, ld_delay_wire; //delay_counter wires
 
 wire playerEN_wire, checkEN_wire, check_wire, player_input_wire; //player wires
 wire [1:0] tile_wire;
+wire load_current_score_wire, load_best_score_wire;
 
 tile_LUT t0(
 	.x(lut_x), //output to
@@ -127,7 +129,9 @@ graphics_control control(
 	.player_input(player_input_wire),
 	.playerEN(playerEN_wire),
 	.check(check_wire),
-	.seq(seq_wire)
+	.seq(seq_wire),
+	.ld_best_score(load_best_score_wire),
+	.ld_current_score(load_current_score_wire)
 	);
 
 random_generator random_gen(
@@ -155,4 +159,12 @@ player p0(
 	.player_input(player_input_wire)
 	);
 
+highscore h0(
+	.clk(CLOCK_50),
+	.sequence_counter(seq_counter_wire),
+	.HEX_best(HEX3),
+	.HEX_current(HEX0),
+	.load_current(load_current_score_wire),
+	.load_best(load_best_score_wire)
+	);
 endmodule
