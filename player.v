@@ -1,7 +1,7 @@
 module player(seq, check, seq_counter, playerEN, checkEN, KEY, clk, player_input);
 	input [3:0] KEY;
 	input [17:0] seq;
-	input [5:0] seq_counter;
+	input [3:0] seq_counter;
 	input playerEN, checkEN;
 	input clk;
 
