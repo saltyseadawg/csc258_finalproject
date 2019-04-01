@@ -40,7 +40,7 @@ module top
 
 
 	vga_adapter VGA(
-			.resetn(SW[9]),
+			.resetn(KEY[0]),
 			.clock(CLOCK_50),
 			.colour(colour),
 			.x(vga_x),
@@ -99,7 +99,7 @@ module top
 		.y_out(vga_y),
 		.load(load_tile),
 		.enable(counter_wire),
-		.resetn(SW[9]),
+		.resetn(KEY[0]),
 		.x_in(lut_x),
 		.y_in(lut_y),
 		.flash(flash),
@@ -110,7 +110,7 @@ module top
 
 	graphics_control control(
 		.clock(CLOCK_50),
-		.resetn(SW[9]),
+		.resetn(KEY[0]),
 		.load(SW[0]),
 		.load_level(SW[1]),
 		.ld_tile(load_tile),
@@ -179,7 +179,7 @@ module top
 
 	keyboard_tracker #(.PULSE_OR_HOLD(0)) keyboard_player(
 		.clock(CLOCK_50),
-		.reset(SW[9]),
+		.reset(KEY[0]),
 		.PS2_CLK(PS2_CLK),
 		.PS2_DAT(PS2_DAT),
 		.w(w_wire),
